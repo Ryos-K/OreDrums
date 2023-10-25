@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.Date
 
 internal const val INSTRUMENT_TABLE = "instruments"
 internal const val INSTRUMENT_ID = "instrument_id"
@@ -16,5 +17,7 @@ data class InstrumentEntity(
     val name: String,
     @ColumnInfo(name = "sound_uri") val soundUri: Uri,
     @ColumnInfo(name = "image_uri") val imageUri: Uri?,
-    val color: Color
+    val color: Color,
+    @ColumnInfo(name = "created_at") val createdAt: Date,
+    @ColumnInfo(name = "updated_at") val updatedAt: Date
 )

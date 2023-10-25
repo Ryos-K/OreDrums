@@ -8,6 +8,7 @@ import com.ry05k2ulv.oredrums.database.model.INSTRUMENT_ID
 import com.ry05k2ulv.oredrums.database.model.INSTRUMENT_TABLE
 import com.ry05k2ulv.oredrums.database.model.InstrumentEntity
 import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 @Dao
 interface InstrumentDao {
@@ -15,10 +16,27 @@ interface InstrumentDao {
     fun getAll(): Flow<List<InstrumentEntity>>
 
     @Insert
-    fun insert(instrument: InstrumentEntity)
+    fun _insert(instrument: InstrumentEntity)
+
+    fun insert(instrument: InstrumentEntity) {
+        _insert(
+            instrument.copy(
+                createdAt = Date(System.currentTimeMillis()),
+                updatedAt = Date(System.currentTimeMillis())
+            )
+        )
+    }
 
     @Update
-    fun update(instrument: InstrumentEntity)
+    fun _update(instrument: InstrumentEntity)
+
+    fun update(instrument: InstrumentEntity) {
+        _update(
+            instrument.copy(
+                updatedAt = Date(System.currentTimeMillis())
+            )
+        )
+    }
 
     @Query("delete from $INSTRUMENT_TABLE where $INSTRUMENT_ID = :id")
     fun deleteById(id: Int)
