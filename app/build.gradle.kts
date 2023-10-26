@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("kotlin-kapt")
+    id("com.google.protobuf").version("0.9.4")
 }
 
 android {
@@ -81,6 +82,10 @@ dependencies {
     implementation("com.google.dagger:hilt-android:$hilt_version")
     kapt("com.google.dagger:hilt-android-compiler:$hilt_version")
 
+    // Add Datastore
+    implementation("androidx.datastore:datastore:1.0.0")
+    implementation("com.google.protobuf:protobuf-javalite:3.19.1")
+
     // Add module for Testing
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
     testImplementation ("com.google.truth:truth:1.1.4")
@@ -89,4 +94,27 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+}
+
+// refs: https://github.com/android/nowinandroid/blob/main/core/datastore/src/main/kotlin/com/google/samples/apps/nowinandroid/core/datastore/UserPreferencesSerializer.kt
+// refs: https://medium.com/androiddevelopers/all-about-proto-datastore-1b1af6cd2879
+protobuf {
+    // Configures the Protobuf compilation and the protoc executable
+    protoc {
+        // Downloads from the repositories
+        artifact = "com.google.protobuf:protoc:3.17.1"
+    }
+
+    // Generates the java Protobuf-lite code for the Protobufs in this project
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                // Configures the task output type
+                register("java") {
+                    // Java Lite has smaller code size and is recommended for Android
+                    option("lite")
+                }
+            }
+        }
+    }
 }
