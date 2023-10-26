@@ -8,6 +8,8 @@ import com.ry05k2ulv.oredrums.database.model.INSTRUMENT_ID
 import com.ry05k2ulv.oredrums.database.model.INSTRUMENT_TABLE
 import com.ry05k2ulv.oredrums.database.model.InstrumentEntity
 import kotlinx.coroutines.flow.Flow
+import java.time.Clock
+import java.time.LocalDateTime
 import java.util.Date
 
 @Dao
@@ -16,28 +18,35 @@ interface InstrumentDao {
     fun getAll(): Flow<List<InstrumentEntity>>
 
     @Insert
-    fun _insert(instrument: InstrumentEntity)
-
-    fun insert(instrument: InstrumentEntity) {
-        _insert(
-            instrument.copy(
-                createdAt = Date(System.currentTimeMillis()),
-                updatedAt = Date(System.currentTimeMillis())
-            )
-        )
-    }
+    fun insert(instrument: InstrumentEntity)
 
     @Update
-    fun _update(instrument: InstrumentEntity)
+    fun update(instrument: InstrumentEntity)
 
-    fun update(instrument: InstrumentEntity) {
-        _update(
-            instrument.copy(
-                updatedAt = Date(System.currentTimeMillis())
-            )
-        )
-    }
 
     @Query("delete from $INSTRUMENT_TABLE where $INSTRUMENT_ID = :id")
     fun deleteById(id: Int)
+
+    class Wrapper(private val dao: InstrumentDao, var clock: Clock = Clock.systemDefaultZone()) : InstrumentDao by dao {
+        override fun insert(
+            instrument: InstrumentEntity
+        ) {
+            dao.insert(
+                instrument.copy(
+                    createdAt = LocalDateTime.now(clock),
+                    updatedAt = LocalDateTime.now(clock)
+                )
+            )
+        }
+
+        override fun update(
+           instrument: InstrumentEntity,
+        ) {
+            dao.update(
+                instrument.copy(
+                    updatedAt = LocalDateTime.now(clock)
+                )
+            )
+        }
+    }
 }

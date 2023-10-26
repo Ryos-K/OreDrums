@@ -17,12 +17,12 @@ class UriConverters {
     }
 
     @TypeConverter
-    fun fromUri(uri: Uri?): String? {
+    fun fromBoxUri(uri: Uri?): String? {
         return uri?.let { it.toString() }
     }
 
     @TypeConverter
-    fun toUri(string: String?): Uri? {
+    fun toBoxUri(string: String?): Uri? {
         return string?.let { Uri.parse(it) }
     }
 }

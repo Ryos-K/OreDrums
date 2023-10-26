@@ -38,7 +38,9 @@ class DrumsRepository @Inject constructor(
     /* ----------------------
         Function about Drums
        ---------------------- */
-    fun getDrumsById(id: Int): Flow<Drums> = drumsDao.getById(id).map { it.asExternalModel() }
+    fun getDrumsById(id: Int): Flow<Drums> = drumsDao.getDrumsById(id).map { it.asExternalModel() }
+
+    fun getDrumpadList(): Flow<List<Drumpad>> = drumsDao.getAllDrumpads().map { list -> list.map { it.asExternalModel() } }
 
     fun upsertDrumpad(drumpad: Drumpad) {
         drumsDao.upsertDrumpad(drumpad.asEntity())
@@ -62,7 +64,7 @@ class DrumsRepository @Inject constructor(
         instrumentDao.update(instrument.asEntity())
     }
 
-    fun deleteById(id: Int) {
+    fun deleteInstrumentById(id: Int) {
         instrumentDao.deleteById(id)
     }
 

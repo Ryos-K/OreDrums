@@ -3,8 +3,7 @@ package com.ry05k2ulv.oredrums.di
 import android.content.Context
 import androidx.room.Room
 import com.ry05k2ulv.oredrums.database.OreDatabase
-import com.ry05k2ulv.oredrums.database.utils.ColorConverters
-import com.ry05k2ulv.oredrums.database.utils.DateConverters
+import com.ry05k2ulv.oredrums.database.utils.LocalDateTimeConverters
 import com.ry05k2ulv.oredrums.database.utils.UriConverters
 import dagger.Module
 import dagger.Provides
@@ -25,8 +24,7 @@ object DatabaseModule {
         klass = OreDatabase::class.java,
         name = "ore_database"
     )
-        .addTypeConverter(ColorConverters())
-        .addTypeConverter(DateConverters())
+        .addTypeConverter(LocalDateTimeConverters())
         .addTypeConverter(UriConverters())
         .fallbackToDestructiveMigration()
         .build()

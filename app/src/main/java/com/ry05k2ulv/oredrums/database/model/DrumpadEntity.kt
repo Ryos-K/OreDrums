@@ -3,10 +3,11 @@ package com.ry05k2ulv.oredrums.database.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-internal const val DRUMPAD_TABLE = "locations"
-internal const val DRUMPAD_ID = "location_id"
+internal const val DRUMPAD_TABLE = "drumpad"
+internal const val DRUMPAD_ID = "drumpad_id"
 
 @Entity(
     tableName = DRUMPAD_TABLE,
@@ -23,7 +24,8 @@ internal const val DRUMPAD_ID = "location_id"
             childColumns = [DRUMS_PROPERTY_ID],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(DRUMS_PROPERTY_ID), Index(INSTRUMENT_ID)]
 )
 data class DrumpadEntity(
     @PrimaryKey(autoGenerate = true)

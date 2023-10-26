@@ -8,8 +8,8 @@ import com.ry05k2ulv.oredrums.database.model.DRUMS_PROPERTY_ID
 import com.ry05k2ulv.oredrums.database.model.DRUMS_PROPERTY_TABLE
 import com.ry05k2ulv.oredrums.database.model.DrumsPropertyEntity
 import kotlinx.coroutines.flow.Flow
-import java.util.Calendar
-import java.util.Date
+import java.time.Clock
+import java.time.LocalDateTime
 
 @Dao
 interface DrumsPropertyDao {
@@ -17,28 +17,35 @@ interface DrumsPropertyDao {
     fun getAll(): Flow<List<DrumsPropertyEntity>>
 
     @Insert
-    fun _insert(drumsPropertyEntity: DrumsPropertyEntity)
-
-    fun insert(drumsPropertyEntity: DrumsPropertyEntity) {
-        _insert(
-            drumsPropertyEntity.copy(
-                createdAt = Date(System.currentTimeMillis()),
-                updatedAt = Date(System.currentTimeMillis())
-            )
-        )
-    }
+    fun insert(drumsPropertyEntity: DrumsPropertyEntity)
 
     @Update
-    fun _update(drumsPropertyEntity: DrumsPropertyEntity)
-
-    fun update(drumsPropertyEntity: DrumsPropertyEntity) {
-        _update(
-            drumsPropertyEntity.copy(
-                updatedAt = Date(System.currentTimeMillis())
-            )
-        )
-    }
+    fun update(drumsPropertyEntity: DrumsPropertyEntity)
 
     @Query("delete from $DRUMS_PROPERTY_TABLE where $DRUMS_PROPERTY_ID = :id")
     fun deleteById(id: Int)
+
+    class Wrapper(private val dao: DrumsPropertyDao, var clock: Clock = Clock.systemDefaultZone()) :
+        DrumsPropertyDao by dao {
+        override fun insert(
+            drumsPropertyEntity: DrumsPropertyEntity
+        ) {
+            dao.insert(
+                drumsPropertyEntity.copy(
+                    createdAt = LocalDateTime.now(clock),
+                    updatedAt = LocalDateTime.now(clock)
+                )
+            )
+        }
+
+        override fun update(
+            drumsPropertyEntity: DrumsPropertyEntity
+        ) {
+            dao.update(
+                drumsPropertyEntity.copy(
+                    updatedAt = LocalDateTime.now(clock)
+                )
+            )
+        }
+    }
 }

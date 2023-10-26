@@ -7,20 +7,21 @@ import com.ry05k2ulv.oredrums.database.dao.DrumsDao
 import com.ry05k2ulv.oredrums.database.dao.DrumsPropertyDao
 import com.ry05k2ulv.oredrums.database.dao.InstrumentDao
 import com.ry05k2ulv.oredrums.database.model.DrumpadEntity
-import com.ry05k2ulv.oredrums.database.model.DrumsEntity
 import com.ry05k2ulv.oredrums.database.model.DrumsPropertyEntity
 import com.ry05k2ulv.oredrums.database.model.InstrumentEntity
-import com.ry05k2ulv.oredrums.database.utils.ColorConverters
-import com.ry05k2ulv.oredrums.database.utils.DateConverters
+import com.ry05k2ulv.oredrums.database.utils.LocalDateTimeConverters
 import com.ry05k2ulv.oredrums.database.utils.UriConverters
 
 @Database(
-    entities = [DrumsEntity::class, DrumsPropertyEntity::class, DrumpadEntity::class, InstrumentEntity::class],
-    version = 1
+    entities = [DrumsPropertyEntity::class, DrumpadEntity::class, InstrumentEntity::class],
+    version = 1,
+    exportSchema = false
 )
-@TypeConverters(ColorConverters::class, DateConverters::class, UriConverters::class)
+@TypeConverters(LocalDateTimeConverters::class, UriConverters::class)
 abstract class OreDatabase : RoomDatabase() {
     abstract fun drumsDao(): DrumsDao
-    abstract fun drumsPropertyDao(): DrumsPropertyDao
-    abstract fun instrumentDao(): InstrumentDao
+    protected abstract fun rawDrumsPropertyDao(): DrumsPropertyDao
+    fun drumsPropertyDao() = DrumsPropertyDao.Wrapper(rawDrumsPropertyDao())
+    protected abstract fun rawInstrumentDao(): InstrumentDao
+    fun instrumentDao() = InstrumentDao.Wrapper(rawInstrumentDao())
 }

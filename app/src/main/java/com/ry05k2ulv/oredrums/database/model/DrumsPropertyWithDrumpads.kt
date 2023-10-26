@@ -15,7 +15,7 @@ data class DrumsPropertyWithDrumpads(
 data class DrumpadWithInstrument(
     @Embedded val drumpad: DrumpadEntity,
     @Relation(
-        parentColumn = DRUMPAD_ID,
-        entityColumn = DRUMPAD_ID
+        parentColumn = INSTRUMENT_ID,
+        entityColumn = INSTRUMENT_ID
     ) val instrument: InstrumentEntity
 )

@@ -2,6 +2,8 @@ package com.ry05k2ulv.oredrums.model
 
 import android.net.Uri
 import androidx.compose.ui.graphics.Color
+import java.time.Instant
+import java.time.LocalDateTime
 import java.util.Date
 
 data class Instrument(
@@ -10,6 +12,6 @@ data class Instrument(
     val soundUri: Uri,
     val imageUri: Uri?,
     val color: Color,
-    val createdAt: Date,
-    val updatedAt: Date
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime
 )
