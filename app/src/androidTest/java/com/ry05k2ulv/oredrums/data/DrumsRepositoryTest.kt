@@ -1,6 +1,7 @@
 package com.ry05k2ulv.oredrums.data
 
 import android.content.Context
+import android.database.sqlite.SQLiteConstraintException
 import android.net.Uri
 import androidx.compose.ui.graphics.Color
 import androidx.room.Room
@@ -109,14 +110,14 @@ class DrumsRepositoryTest {
     }
 
     @Test
-    fun getPropertyList() {
+    fun return_empty_property_list_at_first_time() {
         testScope.runTest {
             assertThat(subject.getPropertyList().first()).isEmpty()
         }
     }
 
     @Test
-    fun insertProperty() {
+    fun return_property_list_overwritten_createdAt_and_updatedAt_on_insertion() {
         testScope.runTest {
             val clock1 = Clock.fixed(Instant.now(), ZoneId.systemDefault())
             val dateTime1 = LocalDateTime.now(clock1)
@@ -134,7 +135,7 @@ class DrumsRepositoryTest {
     }
 
     @Test
-    fun updateProperty() {
+    fun return_property_list_overwritten_updatedAt_on_update() {
         testScope.runTest {
             val clock1 = Clock.fixed(Instant.now(), ZoneId.systemDefault())
             val clock2 = Clock.offset(clock1, Duration.ofDays(1))
@@ -163,7 +164,7 @@ class DrumsRepositoryTest {
     }
 
     @Test
-    fun deletePropertyById() {
+    fun delete_property_by_id() {
         testScope.runTest {
             val clock1 = Clock.fixed(Instant.now(), ZoneId.systemDefault())
             val dateTime1 = LocalDateTime.now(clock1)
@@ -180,7 +181,7 @@ class DrumsRepositoryTest {
     }
 
     @Test
-    fun getDrumsById() {
+    fun get_drums_joined_drumpad_and_instrument_by_id() {
         testScope.runTest {
             val clock1 = Clock.fixed(Instant.now(), ZoneId.systemDefault())
             val dateTime1 = LocalDateTime.now(clock1)
@@ -217,12 +218,11 @@ class DrumsRepositoryTest {
                     )
                 )
             )
-
         }
     }
 
     @Test
-    fun upsertDrumpad() {
+    fun upsert_drumpad() {
         testScope.runTest {
             propertyDummy.forEach { subject.insertProperty(it) }
             instrumentDummy.forEach { subject.insertInstrument(it) }
@@ -244,7 +244,7 @@ class DrumsRepositoryTest {
     }
 
     @Test
-    fun deleteDrumpadById() {
+    fun delete_drumpad_by_id() {
         testScope.runTest {
             propertyDummy.forEach { subject.insertProperty(it) }
             instrumentDummy.forEach { subject.insertInstrument(it) }
@@ -262,14 +262,14 @@ class DrumsRepositoryTest {
     }
 
     @Test
-    fun getInstrumentList() {
+    fun get_empty_instrument_list_at_first() {
         testScope.runTest {
             assertThat(subject.getInstrumentList().first()).isEmpty()
         }
     }
 
     @Test
-    fun insertInstrument() {
+    fun return_instrument_list_overwritten_createdAt_and_updatedAt_on_insertion() {
         testScope.runTest {
             val clock1 = Clock.fixed(Instant.now(), ZoneId.systemDefault())
             val dateTime1 = LocalDateTime.now(clock1)
@@ -287,7 +287,7 @@ class DrumsRepositoryTest {
     }
 
     @Test
-    fun updateInstrument() {
+    fun return_instrument_list_overwritten_updatedAt_on_update() {
         testScope.runTest {
             val clock1 = Clock.fixed(Instant.now(), ZoneId.systemDefault())
             val clock2 = Clock.offset(clock1, Duration.ofDays(1))
@@ -316,7 +316,7 @@ class DrumsRepositoryTest {
     }
 
     @Test
-    fun deleteInstrumentById() {
+    fun delete_instrument_by_id() {
         testScope.runTest {
             val clock1 = Clock.fixed(Instant.now(), ZoneId.systemDefault())
             val dateTime1 = LocalDateTime.now(clock1)
