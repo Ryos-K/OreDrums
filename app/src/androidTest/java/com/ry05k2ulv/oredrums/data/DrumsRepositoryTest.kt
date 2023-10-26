@@ -262,6 +262,52 @@ class DrumsRepositoryTest {
     }
 
     @Test
+    fun cascade_deletion_of_foreign_key_to_property() {
+        testScope.runTest {
+            propertyDummy.forEach { subject.insertProperty(it) }
+            instrumentDummy.forEach { subject.insertInstrument(it) }
+            drumpadDummy.forEach { subject.upsertDrumpad(it) }
+
+            subject.deletePropertyById(1)
+
+            assertThat(subject.getDrumpadList().first()).isEqualTo(
+                listOf(drumpadDummy[2])
+            )
+        }
+    }
+
+    @Test
+    fun cascade_deletion_of_foreign_key_to_instrument() {
+        testScope.runTest {
+            propertyDummy.forEach { subject.insertProperty(it) }
+            instrumentDummy.forEach { subject.insertInstrument(it) }
+            drumpadDummy.forEach { subject.upsertDrumpad(it) }
+
+            subject.deleteInstrumentById(1)
+
+            assertThat(subject.getDrumpadList().first()).isEqualTo(
+                listOf(drumpadDummy[1])
+            )
+        }
+    }
+
+    @Test(expected = SQLiteConstraintException::class)
+    fun throw_exception_when_foreign_key_to_property_is_not_exist() {
+        testScope.runTest {
+            instrumentDummy.forEach { subject.insertInstrument(it) }
+            drumpadDummy.forEach { subject.upsertDrumpad(it) }
+        }
+    }
+
+    @Test(expected = SQLiteConstraintException::class)
+    fun throw_exception_when_foreign_key_to_instrument_is_not_exist() {
+        testScope.runTest {
+            propertyDummy.forEach { subject.insertProperty(it) }
+            drumpadDummy.forEach { subject.upsertDrumpad(it) }
+        }
+    }
+
+    @Test
     fun get_empty_instrument_list_at_first() {
         testScope.runTest {
             assertThat(subject.getInstrumentList().first()).isEmpty()
