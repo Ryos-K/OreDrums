@@ -4,6 +4,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("kotlin-kapt")
     id("com.google.protobuf").version("0.9.4")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -78,9 +79,10 @@ dependencies {
     annotationProcessor("androidx.room:room-compiler:$room_version")
 
     // Add Hilt for dependencies injection
-    val hilt_version = "2.48"
+    val hilt_version = "2.46"
     implementation("com.google.dagger:hilt-android:$hilt_version")
     kapt("com.google.dagger:hilt-android-compiler:$hilt_version")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     // Add Datastore
     implementation("androidx.datastore:datastore:1.0.0")
