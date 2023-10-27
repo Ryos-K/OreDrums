@@ -23,9 +23,9 @@ interface DrumsDao {
     fun getAllDrumpads(): Flow<List<DrumpadEntity>>
 
     @Upsert
-    fun upsertDrumpad(drumpad: DrumpadEntity)
+    suspend fun upsertDrumpad(drumpad: DrumpadEntity)
 
     @Query("delete from $DRUMPAD_TABLE where $DRUMPAD_ID = :id")
-    fun deleteDrumpadById(id: Int)
+    suspend fun deleteDrumpadById(id: Int)
 
 }

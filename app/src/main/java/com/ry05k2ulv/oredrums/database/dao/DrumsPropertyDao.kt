@@ -17,17 +17,17 @@ interface DrumsPropertyDao {
     fun getAll(): Flow<List<DrumsPropertyEntity>>
 
     @Insert
-    fun insert(drumsPropertyEntity: DrumsPropertyEntity)
+    suspend fun insert(drumsPropertyEntity: DrumsPropertyEntity)
 
     @Update
-    fun update(drumsPropertyEntity: DrumsPropertyEntity)
+    suspend fun update(drumsPropertyEntity: DrumsPropertyEntity)
 
     @Query("delete from $DRUMS_PROPERTY_TABLE where $DRUMS_PROPERTY_ID = :id")
-    fun deleteById(id: Int)
+    suspend fun deleteById(id: Int)
 
     class Wrapper(private val dao: DrumsPropertyDao, var clock: Clock = Clock.systemDefaultZone()) :
         DrumsPropertyDao by dao {
-        override fun insert(
+        override suspend fun insert(
             drumsPropertyEntity: DrumsPropertyEntity
         ) {
             dao.insert(
@@ -38,7 +38,7 @@ interface DrumsPropertyDao {
             )
         }
 
-        override fun update(
+        override suspend fun update(
             drumsPropertyEntity: DrumsPropertyEntity
         ) {
             dao.update(

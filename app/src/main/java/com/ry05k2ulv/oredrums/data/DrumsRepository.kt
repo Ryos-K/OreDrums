@@ -5,15 +5,18 @@ import com.ry05k2ulv.oredrums.data.model.asExternalModel
 import com.ry05k2ulv.oredrums.database.dao.DrumsDao
 import com.ry05k2ulv.oredrums.database.dao.DrumsPropertyDao
 import com.ry05k2ulv.oredrums.database.dao.InstrumentDao
+import com.ry05k2ulv.oredrums.database.model.DrumsPropertyEntity
 import com.ry05k2ulv.oredrums.model.Drumpad
 import com.ry05k2ulv.oredrums.model.Drums
 import com.ry05k2ulv.oredrums.model.DrumsProperty
 import com.ry05k2ulv.oredrums.model.Instrument
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDateTime
 import javax.inject.Inject
+import javax.inject.Singleton
 
-
+@Singleton
 class DrumsRepository @Inject constructor(
     private val drumsDao: DrumsDao,
     private val drumsPropertyDao: DrumsPropertyDao,
@@ -25,15 +28,19 @@ class DrumsRepository @Inject constructor(
     fun getPropertyList(): Flow<List<DrumsProperty>> =
         drumsPropertyDao.getAll().map { list -> list.map { it.asExternalModel() } }
 
-    fun insertProperty(drumsProperty: DrumsProperty) {
+    suspend fun insertProperty(drumsProperty: DrumsProperty) {
         drumsPropertyDao.insert(drumsProperty.asEntity())
     }
 
-    fun updateProperty(drumsProperty: DrumsProperty) {
+    suspend fun insertProperty(title: String) {
+        drumsPropertyDao.insert(DrumsPropertyEntity(0, title, LocalDateTime.MIN, LocalDateTime.MIN))
+    }
+
+    suspend fun updateProperty(drumsProperty: DrumsProperty) {
         drumsPropertyDao.update(drumsProperty.asEntity())
     }
 
-    fun deletePropertyById(id: Int) = drumsPropertyDao.deleteById(id)
+    suspend fun deletePropertyById(id: Int) = drumsPropertyDao.deleteById(id)
 
     /* ----------------------
         Function about Drums
@@ -42,11 +49,11 @@ class DrumsRepository @Inject constructor(
 
     fun getDrumpadList(): Flow<List<Drumpad>> = drumsDao.getAllDrumpads().map { list -> list.map { it.asExternalModel() } }
 
-    fun upsertDrumpad(drumpad: Drumpad) {
+    suspend fun upsertDrumpad(drumpad: Drumpad) {
         drumsDao.upsertDrumpad(drumpad.asEntity())
     }
 
-    fun deleteDrumpadById(id: Int) {
+    suspend fun deleteDrumpadById(id: Int) {
         drumsDao.deleteDrumpadById(id)
     }
 
@@ -56,17 +63,15 @@ class DrumsRepository @Inject constructor(
     fun getInstrumentList(): Flow<List<Instrument>> =
         instrumentDao.getAll().map { list -> list.map { it.asExternalModel() } }
 
-    fun insertInstrument(instrument: Instrument) {
+    suspend fun insertInstrument(instrument: Instrument) {
         instrumentDao.insert(instrument.asEntity())
     }
 
-    fun updateInstrument(instrument: Instrument) {
+    suspend fun updateInstrument(instrument: Instrument) {
         instrumentDao.update(instrument.asEntity())
     }
 
-    fun deleteInstrumentById(id: Int) {
+    suspend fun deleteInstrumentById(id: Int) {
         instrumentDao.deleteById(id)
     }
-
-
 }

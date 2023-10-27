@@ -18,17 +18,17 @@ interface InstrumentDao {
     fun getAll(): Flow<List<InstrumentEntity>>
 
     @Insert
-    fun insert(instrument: InstrumentEntity)
+    suspend fun insert(instrument: InstrumentEntity)
 
     @Update
-    fun update(instrument: InstrumentEntity)
+    suspend fun update(instrument: InstrumentEntity)
 
 
     @Query("delete from $INSTRUMENT_TABLE where $INSTRUMENT_ID = :id")
-    fun deleteById(id: Int)
+    suspend fun deleteById(id: Int)
 
     class Wrapper(private val dao: InstrumentDao, var clock: Clock = Clock.systemDefaultZone()) : InstrumentDao by dao {
-        override fun insert(
+        override suspend fun insert(
             instrument: InstrumentEntity
         ) {
             dao.insert(
@@ -39,7 +39,7 @@ interface InstrumentDao {
             )
         }
 
-        override fun update(
+        override suspend fun update(
            instrument: InstrumentEntity,
         ) {
             dao.update(
