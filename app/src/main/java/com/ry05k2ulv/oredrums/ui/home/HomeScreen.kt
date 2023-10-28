@@ -2,14 +2,16 @@ package com.ry05k2ulv.oredrums.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -17,29 +19,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridItemScope
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,133 +51,157 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ry05k2ulv.oredrums.model.DrumsProperty
+import com.ry05k2ulv.oredrums.ui.components.AddFloatingActionButton
+import com.ry05k2ulv.oredrums.ui.components.ArrowBackIconButton
+import com.ry05k2ulv.oredrums.ui.components.EditToggleIconButton
+import com.ry05k2ulv.oredrums.ui.components.OpenTextButton
+import com.ry05k2ulv.oredrums.ui.components.RemoveFloatingActionButton
+import com.ry05k2ulv.oredrums.ui.components.SettingsIconButton
 import com.ry05k2ulv.oredrums.utils.flip
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 internal fun HomeRoute(
-    onPropertyClick: (id: Int) -> Unit = {},
+    onOpenClick: (id: Int) -> Unit,
+    onSettingsClick: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState: HomeUiState by viewModel.uiState.collectAsState()
 
     HomeScreen(
         uiState = uiState,
-        onPropertyClick = onPropertyClick,
+        onSettingsClick = onSettingsClick,
+        onOpenClick = onOpenClick,
         onAddProperty = viewModel::insertProperty,
-        onRemoveProperty = viewModel::deletePropertyById
+        onRemoveProperty = viewModel::deletePropertyById,
+        onEditProperty = viewModel::updateProperty
     )
 }
 
 @Composable
 internal fun HomeScreen(
     uiState: HomeUiState,
-    onPropertyClick: (id: Int) -> Unit,
+    onSettingsClick: () -> Unit,
+    onOpenClick: (id: Int) -> Unit,
     onAddProperty: (title: String) -> Unit,
     onRemoveProperty: (id: Int) -> Unit,
+    onEditProperty: (DrumsProperty) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier) {
+        HomeTopBar(onSettingsClick = onSettingsClick, modifier = Modifier)
         when (uiState) {
             HomeUiState.Loading -> LoadingScreen()
             is HomeUiState.Success -> SuccessScreen(
                 modifier = Modifier
                     .fillMaxSize(),
                 properties = uiState.properties,
-                onPropertyClick = onPropertyClick,
+                onOpenClick = onOpenClick,
                 onAddProperty = onAddProperty,
-                onRemoveProperty = onRemoveProperty
+                onRemoveProperty = onRemoveProperty,
+                onEditProperty = onEditProperty
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HomeTopBar(
+    onSettingsClick: () -> Unit,
+    modifier: Modifier,
+) {
+    TopAppBar(
+        title = {
+            Spacer(modifier = Modifier.width(32.dp))
+            Text(text = "Ore Drums", style = MaterialTheme.typography.headlineLarge)
+        },
+        actions = {
+            SettingsIconButton(onClick = onSettingsClick)
+        },
+        modifier = modifier,
+        colors = TopAppBarDefaults.mediumTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    )
 }
 
 @Composable
 private fun SuccessScreen(
     modifier: Modifier,
     properties: List<DrumsProperty>,
-    onPropertyClick: (id: Int) -> Unit,
+    onOpenClick: (id: Int) -> Unit,
     onAddProperty: (title: String) -> Unit,
-    onRemoveProperty: (id: Int) -> Unit
+    onRemoveProperty: (id: Int) -> Unit,
+    onEditProperty: (DrumsProperty) -> Unit
 ) {
-    var showAddPropertyDialog by remember { mutableStateOf(false) }
-
-    var propertyShouldShow by remember { mutableStateOf<DrumsProperty?>(null) }
+    var propertyIdShouldShow by remember { mutableStateOf<Int?>(null) }
 
     var selectedSet by remember { mutableStateOf(setOf<Int>()) }
 
-    if (showAddPropertyDialog) {
-        AddPropertyDialog(
-            onDismiss = { showAddPropertyDialog = false },
-            onAccept = { title ->
-                onAddProperty(title)
-                showAddPropertyDialog = false
-            })
-    }
-
     Row(modifier) {
+        AnimatedVisibility(visible = propertyIdShouldShow != null) {
+            DetailsPane(
+                property = properties.find { it.id == propertyIdShouldShow },
+                onPropertyChange = onEditProperty,
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .fillMaxHeight(),
+                onOpenClick = onOpenClick,
+                onCloseClick = { propertyIdShouldShow = null }
+            )
+        }
+
         Box(Modifier.weight(1f)) {
             PropertyLazyList(
-                columns = GridCells.Fixed(if (propertyShouldShow == null) 2 else 1),
                 modifier = Modifier.fillMaxSize(),
                 properties = properties,
                 selectMode = selectedSet.isNotEmpty(),
                 selectedSet = selectedSet,
                 onSelectChange = { selectedSet = it },
-                onDetailsClick = { propertyShouldShow = it },
-                onPropertyClick = onPropertyClick
+                onPropertyClick = { propertyIdShouldShow = it.id }
             )
 
             if (selectedSet.isEmpty()) AddFloatingActionButton(
                 onClick = { onAddProperty("Untitled 1") },
-                modifier = Modifier.align(Alignment.BottomEnd)
-            ) else RemoveFloatingActionButton(
-                onClick = { selectedSet.forEach(onRemoveProperty); selectedSet = setOf() },
-                modifier = Modifier.align(Alignment.BottomEnd)
-            )
-        }
-        if (propertyShouldShow != null) {
-            DetailsPane(
-                property = propertyShouldShow!!,
                 modifier = Modifier
-                    .fillMaxWidth(0.5f)
-                    .fillMaxHeight()
-                    .animateContentSize(),
-                onEditClick = {},
-                onCloseClick = { propertyShouldShow = null },
+                    .align(Alignment.BottomEnd)
+                    .padding(24.dp)
+            ) else RemoveFloatingActionButton(
+                onClick = {
+                    selectedSet.forEach(onRemoveProperty)
+                    propertyIdShouldShow?.let { if (it in selectedSet) propertyIdShouldShow = null }
+                    selectedSet = setOf()
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(24.dp)
             )
         }
     }
 }
-
-@Composable
-private fun LoadingScreen(
-    modifier: Modifier = Modifier.fillMaxSize()
-) {
-    Box(modifier) {
-        CircularProgressIndicator(Modifier.align(Alignment.Center))
-    }
-}
-
 
 @Composable
 private fun PropertyLazyList(
-    columns: GridCells,
     modifier: Modifier,
     properties: List<DrumsProperty>,
     selectMode: Boolean,
     selectedSet: Set<Int>,
     onSelectChange: (Set<Int>) -> Unit,
-    onDetailsClick: (DrumsProperty) -> Unit,
-    onPropertyClick: (id: Int) -> Unit,
+    onPropertyClick: (DrumsProperty) -> Unit,
 ) {
-    LazyVerticalGrid(columns, modifier) {
-        items(items = properties, { it.id }) {
+    LazyColumn(modifier = modifier) {
+        items(properties, { it.id }) {
             PropertyLazyListItem(
                 modifier = Modifier
                     .padding(8.dp, 4.dp)
@@ -185,10 +211,9 @@ private fun PropertyLazyList(
                 selected = it.id in selectedSet,
                 onClick = {
                     if (selectMode) onSelectChange(selectedSet.flip(it.id))
-                    else onPropertyClick(it.id)
+                    else onPropertyClick(it)
                 },
                 onLongClick = { onSelectChange(selectedSet.flip(it.id)) },
-                onDetailsClick = { onDetailsClick(it) }
             )
         }
     }
@@ -196,13 +221,12 @@ private fun PropertyLazyList(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun LazyGridItemScope.PropertyLazyListItem(
+private fun LazyItemScope.PropertyLazyListItem(
     modifier: Modifier,
     property: DrumsProperty,
     selected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    onDetailsClick: () -> Unit
 ) {
     val primaryIfSelected by animateColorAsState(if (selected) MaterialTheme.colorScheme.primary else Color.Transparent)
     val padding by animateDpAsState(if (selected) 1.dp else 0.dp)
@@ -225,104 +249,142 @@ private fun LazyGridItemScope.PropertyLazyListItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = property.title)
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = onDetailsClick) {
-                    Icon(imageVector = Icons.Default.Info, contentDescription = "Info")
-                }
             }
         }
     }
 }
 
-@Composable
-fun AddFloatingActionButton(
-    onClick: () -> Unit,
-    modifier: Modifier,
-) {
-    FloatingActionButton(onClick = onClick, modifier = modifier) {
-        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Property")
-    }
-}
-
-@Composable
-fun RemoveFloatingActionButton(
-    onClick: () -> Unit,
-    modifier: Modifier,
-) {
-    FloatingActionButton(onClick = onClick, modifier = modifier) {
-        Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove Property")
-    }
-}
 
 @Composable
 fun DetailsPane(
-    property: DrumsProperty,
+    property: DrumsProperty?,
+    onPropertyChange: (DrumsProperty) -> Unit,
     modifier: Modifier,
-    onEditClick: () -> Unit,
+    onOpenClick: (id: Int) -> Unit,
     onCloseClick: () -> Unit
 ) {
+    var editMode: Boolean by remember { mutableStateOf(false) }
 
-    Column(
-        modifier
-            .fillMaxSize()
-    ) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(8.dp), horizontalArrangement = Arrangement.End
-        ) {
-            IconButton(onClick = onEditClick) {
-                Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+    property?.let {
+        Column(modifier) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ArrowBackIconButton(onClick = onCloseClick)
+                EditToggleIconButton(
+                    editMode = editMode,
+                    onEditClick = { editMode = true },
+                    onEditOffClick = { editMode = false })
             }
-            IconButton(onClick = onCloseClick) {
-                Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "Close")
+            DetailsPaneTitleSection(
+                property.title,
+                onTitleChange = {
+                    onPropertyChange(
+                        property.copy(title = it)
+                    )
+                },
+                editMode = editMode
+            )
+            DetailsPaneDateTimeSection("Created At", property.createdAt)
+            DetailsPaneDateTimeSection("Updated At", property.updatedAt)
+
+            Spacer(modifier = Modifier.weight(1f))
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp), horizontalArrangement = Arrangement.End
+            ) {
+                OpenTextButton(onClick = { onOpenClick(property.id) })
             }
         }
-        Text(
-            text = property.title,
-            modifier = Modifier.padding(8.dp),
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Text(
-            text = "Created At ${property.createdAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}",
-            modifier = Modifier.padding(8.dp),
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            text = "Updated At ${property.updatedAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}",
-            modifier = Modifier.padding(8.dp),
-            style = MaterialTheme.typography.titleMedium
-        )
-    }
+    } ?: Box(modifier.fillMaxSize())
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AddPropertyDialog(
-    onDismiss: () -> Unit,
-    onAccept: (title: String) -> Unit
+private fun DetailsPaneTitleSection(
+    title: String,
+    onTitleChange: (String) -> Unit = {},
+    editMode: Boolean = false
 ) {
-    val maxSize = 32
-
-    var text by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = { if (text.length <= maxSize) onAccept(text) }) {
-                Text("OK")
-            }
-        },
-        title = { Text("Input New Title") },
-        text = {
-            TextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { if (text.length > maxSize) Text("length must be 32 or less") },
-                isError = text.length > maxSize,
+    val focusManager = LocalFocusManager.current
+    Row(Modifier.height(56.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (editMode) {
+            BasicTextField(
+                value = title,
+                onValueChange = { onTitleChange(it) },
+                modifier = Modifier.padding(16.dp, 0.dp),
+                textStyle = MaterialTheme.typography.headlineMedium,
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+            ) {
+                TextFieldDefaults.TextFieldDecorationBox(
+                    value = title,
+                    innerTextField = it,
+                    enabled = true,
+                    singleLine = true,
+                    visualTransformation = VisualTransformation.None,
+                    interactionSource = remember { MutableInteractionSource() },
+                    contentPadding = PaddingValues(8.dp, 2.dp),
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit"
+                        )
+                    },
+                    colors = TextFieldDefaults.textFieldColors(textColor = MaterialTheme.colorScheme.onBackground)
+                )
+            }
+        } else {
+            Text(
+                text = title,
+                modifier = Modifier.padding(24.dp, 2.dp),
+                style = MaterialTheme.typography.headlineMedium,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
             )
         }
+    }
+}
+
+@Composable
+private fun DetailsPaneDateTimeSection(
+    text: String,
+    dateTime: LocalDateTime
+) {
+    Row(Modifier.padding(32.dp, 8.dp)) {
+        Text(
+            text = text,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = dateTime.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")),
+            style = MaterialTheme.typography.titleMedium
+        )
+    }
+}
+
+@Composable
+private fun DetailsPaneTextSection(
+    text: String
+) {
+    Text(
+        text = text,
+        modifier = Modifier.padding(8.dp),
+        style = MaterialTheme.typography.titleMedium
     )
+}
+
+@Composable
+private fun LoadingScreen(
+    modifier: Modifier = Modifier.fillMaxSize()
+) {
+    Box(modifier) {
+        CircularProgressIndicator(Modifier.align(Alignment.Center))
+    }
 }
