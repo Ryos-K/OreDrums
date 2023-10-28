@@ -88,6 +88,9 @@ dependencies {
     implementation("androidx.datastore:datastore:1.0.0")
     implementation("com.google.protobuf:protobuf-javalite:3.19.1")
 
+    // Add Icons
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+
     // Add module for Testing
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
     testImplementation ("com.google.truth:truth:1.1.4")
